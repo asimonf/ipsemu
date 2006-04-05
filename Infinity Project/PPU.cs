@@ -150,7 +150,7 @@ namespace Infinity_Project
 
                 vOffset *= 32;
 
-                int* pixels = (int*)this.PPU._frameBufferPtr.Scan0.ToPointer() + _scanline * 256;
+                int* pixels = this.PPU.frameBufferPtr + (_scanline * 256);
 
                 int vPixelOffset = vPos % this.TileSize;
 
@@ -222,6 +222,8 @@ namespace Infinity_Project
                                         else
                                             PixelColorTranslation.Add(color);
                                     }
+
+                                //PixelColorTranslation.Inverse();
 
                                 prevPixelColor = PixelColor;
                             }
@@ -317,8 +319,10 @@ namespace Infinity_Project
 
         // Atributos
 
-        private Bitmap _fBuffer;
-        private BitmapData _frameBufferPtr;
+        //private Bitmap _fBuffer;
+        //private BitmapData _frameBufferPtr;
+
+        unsafe internal int* frameBufferPtr;
         private int[] _cleanBuffer;
 
         private int _frameCount;
@@ -353,10 +357,10 @@ namespace Infinity_Project
         private Bus _bus;
         Rectangle rect = new Rectangle(0, 0, 256, 224);
 
-        public PictureProcesingUnit(Bus bus, Bitmap frameBuffer)
+        public PictureProcesingUnit(Bus bus)
         {
             this._bus = bus;
-            this._fBuffer = frameBuffer;
+            //this._fBuffer = frameBuffer;
             this._cleanBuffer = new int[256 * 224];
 
             for (int j = 0; j < 256 * 224; j++)
@@ -384,11 +388,11 @@ namespace Infinity_Project
             else
                 backColor = BG.ColorScheme[this._bus.CGRam[0] | (this._bus.CGRam[1] << 8)].color;
 
-            int* ptr = (int*)this._frameBufferPtr.Scan0.ToPointer();
+            //int* ptr = (int*)this._frameBufferPtr.Scan0.ToPointer();
 
             for (int i = 0; i < 256; i++)
             {
-                ptr[i + scanlineNumber * 256] = backColor;
+                this.frameBufferPtr[i + scanlineNumber * 256] = backColor;
             }
 
             switch (this.BGMode)
@@ -464,12 +468,12 @@ namespace Infinity_Project
 
         internal unsafe void LockFrameBuffer()
         {
-            this._frameBufferPtr = this._fBuffer.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb);
+            //this._frameBufferPtr = this._fBuffer.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppRgb);
         }
 
         internal void UnlockFrameBuffer()
         {
-            this._fBuffer.UnlockBits(_frameBufferPtr);
+            //this._fBuffer.UnlockBits(_frameBufferPtr);
         }
     }
 }

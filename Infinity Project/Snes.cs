@@ -5,14 +5,18 @@ using System.Windows.Forms;
 using System.Timers;
 using System.Runtime.InteropServices;
 using System.Drawing;
+using Bigwave.Graphx;
+using System.Threading;
+using SdlDotNet;
 
 namespace Infinity_Project
 {
-    public class Snes : UserControl
+    public class Snes
     {
         private Bus _bus;
         private bool _inEmulation;
-        internal Bitmap frameBuffer;
+        internal FrameBuffer frameBuffer;
+        internal ManagedSurface backBuffer;
 
         public bool InEmulation
         {
@@ -23,10 +27,7 @@ namespace Infinity_Project
 
         public Snes()
         {
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.Opaque, true);
-            this.ClientSize = new System.Drawing.Size(256, 224);
-            this.frameBuffer = new Bitmap(256, 224, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-            //this.BackgroundImage = frameBuffer;
+            backBuffer = new ManagedSurface(256, 224);
 
             _bus = new Bus(this);
         }
@@ -39,6 +40,8 @@ namespace Infinity_Project
         public void LoadRom(string Rom)
         {
             _bus.LoadRom(Rom);
+
+            frameBuffer = new FrameBuffer(640, 480, true);
         }
 
         public void StartEmulation()
@@ -53,6 +56,16 @@ namespace Infinity_Project
             this._bus.Enabled = false;
 
             this._inEmulation = false;
+        }
+
+        public void Events_Tick()
+        {
+            if (this.InEmulation)
+            {
+                this._bus.Render();
+                this.frameBuffer.StretchBlit2xNearest(this.backBuffer);
+                this.frameBuffer.Present();
+            }
         }
     }
 }

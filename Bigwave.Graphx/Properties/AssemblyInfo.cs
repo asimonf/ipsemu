@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Bigwave.Graphx")]
-[assembly: AssemblyCopyright("©  2006")]
+[assembly: AssemblyCopyright("© Bigwave 2006")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 //
 // Puede especificar todos los valores o puede establecer como valores predeterminados los números de revisión y generación 
 // mediante el asterisco ('*'), como se muestra a continuación:
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.1.5.3")]
+[assembly: AssemblyFileVersion("0.1.5.3")]

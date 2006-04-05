@@ -13,10 +13,11 @@ namespace Infinity_Project
     {
         public App()
         {
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.Opaque, true);
+            //this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.Opaque, true);
 
             InitializeComponent();
 
+            this.snes1 = new Snes();
             this.openFileDialog1.Title = "Abrir ROM";
         }
 
@@ -27,12 +28,19 @@ namespace Infinity_Project
 
         private void App_Load(object sender, EventArgs e)
         {
-            this.timer1.Enabled = true;
-            //Thread thread = new Thread(new ThreadStart(SdlDotNet.Events.Run));
-            //thread.IsBackground = true;
-            //thread.Name = "SDL";
-            //thread.Priority = ThreadPriority.Normal;
-            //thread.Start();
+            //this.timer1.Enabled = true;
+            SdlDotNet.Events.Fps = 60;
+            SdlDotNet.Events.Tick += new SdlDotNet.TickEventHandler(Events_Tick);
+            Thread thread = new Thread(new ThreadStart(SdlDotNet.Events.Run));
+            thread.IsBackground = true;
+            thread.Name = "SDL";
+            thread.Priority = ThreadPriority.Normal;
+            thread.Start();
+        }
+
+        void Events_Tick(object sender, SdlDotNet.TickEventArgs e)
+        {
+            this.snes1.Events_Tick();
         }
 
         private void openFileDialog1_FileOk_1(object sender, CancelEventArgs e)
@@ -45,9 +53,9 @@ namespace Infinity_Project
             this.snes1.StartEmulation();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void salirToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Invalidate(true);
+            Application.Exit();
         }
     }
 }

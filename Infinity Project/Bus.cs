@@ -96,9 +96,9 @@ namespace Infinity_Project
 
             this._cpu = new CentralProcesingUnit(this);
             this._apu = new AudioProcessingUnit(this);
-            this._ppu = new PictureProcesingUnit(this, s.frameBuffer);
+            this._ppu = new PictureProcesingUnit(this);
 
-            s.Paint += new System.Windows.Forms.PaintEventHandler(s_Paint);
+            //s.Paint += new System.Windows.Forms.PaintEventHandler(s_Paint);
             //Events.Tick += new TickEventHandler(Events_Tick);
 
             //dev.PresentationParameters.DeviceWindow.Paint += new System.Windows.Forms.PaintEventHandler(DeviceWindow_Paint);
@@ -124,23 +124,24 @@ namespace Infinity_Project
 
         Rectangle StretchRect = new Rectangle(0, 0, 512, 448);
 
-        void s_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+        public unsafe void Render()
         {
-            HighResolutionTimer.Instance.Set();
+            //HighResolutionTimer.Instance.Set();
 
             if (this.Enabled)
             {
-                this._ppu.LockFrameBuffer();
-                this.Run();
-                this._ppu.UnlockFrameBuffer();
+                //this._ppu.LockFrameBuffer();
+                fixed (int* ptr = this._snes.backBuffer.Data)
+                {
+                    this._ppu.frameBufferPtr = ptr;
+                    this.Run();
+                }
+                //this._ppu.UnlockFrameBuffer();
             }
 
-            this._ppu.RenderScreen();
-
-            Graphics g = e.Graphics;
-            g.DrawImage(this._snes.frameBuffer, 0, 0);
-            g.DrawString(HighResolutionTimer.Instance.FramesPerSecond.ToString(), f, Brushes.Red, 10, 10);
-            
+            //Graphics g = e.Graphics;
+            //g.DrawImage(this._snes.frameBuffer, 0, 0);
+            //g.DrawString(HighResolutionTimer.Instance.FramesPerSecond.ToString(), f, Brushes.Red, 10, 10);
         }
 
         public void TriggerNMI()
@@ -179,6 +180,8 @@ namespace Infinity_Project
 
             byte[] Buff = null;
             Buff = File.ReadAllBytes(romFile);
+
+            this._rom.Initialize();
 
             if (HasHeader)
             {
