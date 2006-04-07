@@ -59,5 +59,12 @@ namespace Infinity_Project.Properties {
                 resourceCulture = value;
             }
         }
+        
+        internal static System.Drawing.Bitmap infinity_albet {
+            get {
+                object obj = ResourceManager.GetObject("infinity_albet", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

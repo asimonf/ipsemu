@@ -7,16 +7,14 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using Bigwave.Graphx;
 using System.Threading;
-using SdlDotNet;
+using Microsoft.DirectX.Direct3D;
 
 namespace Infinity_Project
 {
-    public class Snes
+    public class Snes : IDisposable
     {
         private Bus _bus;
         private bool _inEmulation;
-        internal FrameBuffer frameBuffer;
-        internal ManagedSurface backBuffer;
 
         public bool InEmulation
         {
@@ -25,11 +23,20 @@ namespace Infinity_Project
 
         private HighResolutionTimer Timer = HighResolutionTimer.Instance;
 
-        public Snes()
+        public Snes(Device dev)
         {
-            backBuffer = new ManagedSurface(256, 224);
+            _bus = new Bus(this, dev);
 
-            _bus = new Bus(this);
+            dev.PresentationParameters.DeviceWindow.Paint += new PaintEventHandler(DeviceWindow_Paint);
+        }
+
+        void DeviceWindow_Paint(object sender, PaintEventArgs e)
+        {
+            if (this._inEmulation)
+            {
+                this._bus.Run();
+                Timer.Set();
+            }
         }
 
         public void Reset()
@@ -40,8 +47,6 @@ namespace Infinity_Project
         public void LoadRom(string Rom)
         {
             _bus.LoadRom(Rom);
-
-            frameBuffer = new FrameBuffer(640, 480, true);
         }
 
         public void StartEmulation()
@@ -49,6 +54,7 @@ namespace Infinity_Project
             this._bus.Enabled = true;
 
             this._inEmulation = true;
+            this.Timer.Reset();
         }
 
         public void StopEmulation()
@@ -58,14 +64,13 @@ namespace Infinity_Project
             this._inEmulation = false;
         }
 
-        public void Events_Tick()
+        #region Miembros de IDisposable
+
+        public void Dispose()
         {
-            if (this.InEmulation)
-            {
-                this._bus.Render();
-                this.frameBuffer.StretchBlit2xNearest(this.backBuffer);
-                this.frameBuffer.Present();
-            }
+            
         }
+
+        #endregion
     }
 }

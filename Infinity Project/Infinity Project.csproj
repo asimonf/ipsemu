@@ -77,10 +77,6 @@
     <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="Microsoft.DirectX.Direct3D, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="Microsoft.DirectX.Direct3DX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
-    <Reference Include="SdlDotNet, Version=4.0.3.0, Culture=neutral, PublicKeyToken=26ad4f7e10c61408">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Archivos de programa\SdlDotNet\sdk\bin\assemblies\SdlDotNet.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -110,10 +106,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Snes.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>Snes.cs</DependentUpon>
-    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
@@ -121,7 +113,6 @@
     </Compile>
     <None Include="app.config" />
     <BaseApplicationManifest Include="Properties\app.manifest" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -134,7 +125,6 @@
     <Compile Include="BasicStructs.cs" />
     <Compile Include="Snes.cs">
     </Compile>
-    <Compile Include="Timer.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -155,6 +145,7 @@
     </PublishFile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\infinity_albet.JPG" />
     <Content Include="Licencia.txt" />
     <Content Include="Readme.txt" />
   </ItemGroup>

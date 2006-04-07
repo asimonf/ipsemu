@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Drawing;
+using Microsoft.DirectX.Direct3D;
+
+using D3DFont = Microsoft.DirectX.Direct3D.Font;
 
 namespace Infinity_Project
 {
@@ -90,13 +93,13 @@ namespace Infinity_Project
         public const int ScanlinesPerFrame = 262;
         public const int NMIScanlineTrigger = 240; 
 
-        public Bus(Snes s)
+        public unsafe Bus(Snes s, Device dev)
         {
             this._snes = s;
 
             this._cpu = new CentralProcesingUnit(this);
             this._apu = new AudioProcessingUnit(this);
-            this._ppu = new PictureProcesingUnit(this);
+            this._ppu = new PictureProcesingUnit(this, dev);
 
             //s.Paint += new System.Windows.Forms.PaintEventHandler(s_Paint);
             //Events.Tick += new TickEventHandler(Events_Tick);
@@ -120,7 +123,7 @@ namespace Infinity_Project
             }
         }
 
-        Font f = new Font("arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
+        System.Drawing.Font f = new System.Drawing.Font("arial", 12, FontStyle.Regular, GraphicsUnit.Pixel);
 
         Rectangle StretchRect = new Rectangle(0, 0, 512, 448);
 
@@ -131,11 +134,11 @@ namespace Infinity_Project
             if (this.Enabled)
             {
                 //this._ppu.LockFrameBuffer();
-                fixed (int* ptr = this._snes.backBuffer.Data)
-                {
-                    this._ppu.frameBufferPtr = ptr;
-                    this.Run();
-                }
+                //fixed (int* ptr = this._snes.backBuffer.Data)
+                //{
+                
+                this.Run();
+                //}
                 //this._ppu.UnlockFrameBuffer();
             }
 
@@ -174,7 +177,7 @@ namespace Infinity_Project
             this.currentDMAChannel = null;
         }
 
-        public void LoadRom(string romFile)
+        public unsafe void LoadRom(string romFile)
         {
             bool HasHeader = true;
 
@@ -1243,10 +1246,13 @@ namespace Infinity_Project
                     this._dmaChannels[i].StartHDMATransfer();
             }
 
+            this._ppu.LockFrameBuffer();
             while (_scanLineNumber < ScanlinesPerFrame)
             {
                 this.Step();
             }
+            this._ppu.UnlockFrameBuffer();
+            this._ppu.RenderScreen();
 
             _scanLineNumber = 0;
             _ppu.InVBlank = false;
