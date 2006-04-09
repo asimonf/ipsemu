@@ -77,4 +77,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetFileName)" "$(SolutionDir)Infinity Project\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>
