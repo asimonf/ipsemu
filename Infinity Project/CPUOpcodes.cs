@@ -2646,12 +2646,13 @@ namespace Infinity_Project
 
 			if ((_regs.Flags & 0x04) == 0)
 			{
-				ushort Sum = (ushort)(_regs.Accumulator.Low + Operand + (_regs.Flags & 0x01));
+                Operand += (byte)(_regs.Flags & 0x01);
+				ushort Sum = (ushort)(_regs.Accumulator.Low + Operand);
 
 				if ((~(_regs.Accumulator.Low ^ Operand) & (Operand ^ Sum) & 0x80) > 0) SetOverflowFlag();
 				else ClearOverflowFlag();
 
-				_regs.Accumulator.Data = (ushort)Sum;
+                _regs.Accumulator.Low = (byte)Sum;
 
 				if ((Sum & 0x100) > 0) SetCarryFlag();
 				else ClearCarryFlag();

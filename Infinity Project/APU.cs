@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Infinity_Project
 {
-    public class AudioProcessingUnit
+    public partial class AudioProcessingUnit
     {
         [StructLayout(LayoutKind.Explicit)]
         struct Registers

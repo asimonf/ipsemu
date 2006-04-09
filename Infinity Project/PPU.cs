@@ -4,8 +4,6 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.IO;
 using BigwaveColor = Bigwave.Graphx.X8R8G8B8Color;
-using Microsoft.DirectX.Direct3D;
-using Microsoft.DirectX;
 
 namespace Infinity_Project
 {
@@ -318,19 +316,7 @@ namespace Infinity_Project
         }
 
         // Atributos
-
-        //private Bitmap _fBuffer;
-        //private BitmapData _frameBufferPtr;
-
         unsafe internal int* frameBufferPtr;
-        internal Surface frameBufferSurface;
-        internal GraphicsStream surfaceStream;
-        internal Device dev;
-
-        private VertexBuffer _vertexBuffer;
-        private Texture _frameBufferTexture;
-        private Font _fps;
-        private Sprite hudRenderer;
 
         private int _frameCount;
         private int _frameSkip = 2;
@@ -363,10 +349,13 @@ namespace Infinity_Project
         internal bool SubstractMode = false;
         private Bus _bus;
 
-        public PictureProcesingUnit(Bus bus, Device dev)
+        private IFramebuffer _frameBuffer;
+
+        public PictureProcesingUnit(Bus bus, IFramebuffer frameBuffer)
         {
             this._bus = bus;
-            this.dev = dev;
+            this._frameBuffer = frameBuffer;
+            frameBuffer.Initialize();
             //this._fBuffer = frameBuffer;
             //this._cleanBuffer = new int[256 * 224];
 
@@ -374,25 +363,6 @@ namespace Infinity_Project
             //{
             //    this._cleanBuffer[j] = j;//(j / 256) + j % 256;
             //}
-
-            this._fps = new Font(dev, new System.Drawing.Font("arial", 12));
-            this._vertexBuffer = new VertexBuffer(typeof(CustomVertex.TransformedTextured), 4, dev, Usage.None, CustomVertex.TransformedTextured.Format, Pool.Managed);
-            this._frameBufferTexture = new Texture(dev, 256, 256, 1, Usage.Dynamic, Format.X8R8G8B8, Pool.Default);
-            this.frameBufferSurface = dev.CreateOffscreenPlainSurface(256, 256, Format.X8R8G8B8, Pool.SystemMemory);
-            hudRenderer = new Sprite(dev);
-
-            {
-                int index = 0;
-
-                CustomVertex.TransformedTextured[] verts = _vertexBuffer.Lock(0, 0) as CustomVertex.TransformedTextured[];
-
-                verts[index++] = new CustomVertex.TransformedTextured(0, 0, 0.5f, 1, 0, 0);
-                verts[index++] = new CustomVertex.TransformedTextured(dev.PresentationParameters.DeviceWindow.ClientSize.Width, 0, 0.5f, 1, 1, 0);
-                verts[index++] = new CustomVertex.TransformedTextured(0, dev.PresentationParameters.DeviceWindow.ClientSize.Height, 0.5f, 1, 0, 0.875f);
-                verts[index++] = new CustomVertex.TransformedTextured(dev.PresentationParameters.DeviceWindow.ClientSize.Width, dev.PresentationParameters.DeviceWindow.ClientSize.Height, 0.5f, 1, 1, 0.875f);
-
-                _vertexBuffer.Unlock();
-            }
 
             BG1 = new BG(this);
             BG2 = new BG(this);
@@ -489,34 +459,17 @@ namespace Infinity_Project
 
         public void RenderScreen()
         {
-            dev.UpdateSurface(this.frameBufferSurface, this._frameBufferTexture.GetSurfaceLevel(0));
-
-            dev.BeginScene();
-
-            dev.VertexFormat = CustomVertex.TransformedTextured.Format;
-            dev.SetStreamSource(0, this._vertexBuffer, 0);
-            dev.SetTexture(0, this._frameBufferTexture);
-            dev.SamplerState[0].MinFilter = TextureFilter.Linear;
-            dev.SamplerState[0].MagFilter = TextureFilter.Linear;
-            dev.DrawPrimitives(PrimitiveType.TriangleStrip, 0, 2);
-
-            hudRenderer.Begin(SpriteFlags.AlphaBlend);
-            _fps.DrawText(hudRenderer, HighResolutionTimer.Instance.FramesPerSecond.ToString(), 10, 40, System.Drawing.Color.White);
-            hudRenderer.End();
-
-            dev.EndScene();
-            dev.Present();
+            this._frameBuffer.Render();
         }
 
         internal unsafe void LockFrameBuffer()
         {
-            surfaceStream = this.frameBufferSurface.LockRectangle(LockFlags.Discard);
-            this.frameBufferPtr = (int*)surfaceStream.InternalDataPointer;
+            this.frameBufferPtr = (int*)_frameBuffer.Lock();
         }
 
         internal void UnlockFrameBuffer()
         {
-            this.frameBufferSurface.UnlockRectangle();
+            _frameBuffer.Unlock();
         }
     }
 }

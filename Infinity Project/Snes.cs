@@ -7,11 +7,12 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using Bigwave.Graphx;
 using System.Threading;
-using Microsoft.DirectX.Direct3D;
+using System.Reflection;
+using System.IO;
 
 namespace Infinity_Project
 {
-    public class Snes : IDisposable
+    public class Snes
     {
         private Bus _bus;
         private bool _inEmulation;
@@ -22,12 +23,21 @@ namespace Infinity_Project
         }
 
         private HighResolutionTimer Timer = HighResolutionTimer.Instance;
+        private IFramebuffer _frameBuffer;
 
-        public Snes(Device dev)
+        public Snes(Control owner)
         {
-            _bus = new Bus(this, dev);
+            if (File.Exists("D3D Plugin.dll"))
+            {
 
-            dev.PresentationParameters.DeviceWindow.Paint += new PaintEventHandler(DeviceWindow_Paint);
+                Assembly a = Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "D3D Plugin.dll"));
+                _frameBuffer = a.CreateInstance("D3D_Plugin.D3DFramebuffer", false, BindingFlags.CreateInstance, null, new object[] { owner }, null, null) as IFramebuffer;
+                _bus = new Bus(this, _frameBuffer);
+
+                owner.Paint += new PaintEventHandler(DeviceWindow_Paint);
+            }
+            else
+                throw new Exception();
         }
 
         void DeviceWindow_Paint(object sender, PaintEventArgs e)
@@ -37,6 +47,8 @@ namespace Infinity_Project
                 this._bus.Run();
                 Timer.Set();
             }
+
+            _frameBuffer.Render();
         }
 
         public void Reset()

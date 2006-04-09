@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Drawing;
-using Microsoft.DirectX.Direct3D;
-
-using D3DFont = Microsoft.DirectX.Direct3D.Font;
 
 namespace Infinity_Project
 {
@@ -17,7 +14,7 @@ namespace Infinity_Project
         private PictureProcesingUnit _ppu;
         private AudioProcessingUnit _apu;
 
-        private byte[] _rom, _lowRam, _highRam, _expandedRam, _sRam, _hardwareRegs;
+        private byte[] _rom, _lowRam, _highRam, _expandedRam, _sRam, _hardwareRegs, _apuMemory;
 
         private DMAChannel[] _dmaChannels;
         private DMAChannel currentDMAChannel = null;
@@ -93,13 +90,13 @@ namespace Infinity_Project
         public const int ScanlinesPerFrame = 262;
         public const int NMIScanlineTrigger = 240; 
 
-        public unsafe Bus(Snes s, Device dev)
+        public unsafe Bus(Snes s, IFramebuffer fb)
         {
             this._snes = s;
 
             this._cpu = new CentralProcesingUnit(this);
             this._apu = new AudioProcessingUnit(this);
-            this._ppu = new PictureProcesingUnit(this, dev);
+            this._ppu = new PictureProcesingUnit(this, fb);
 
             //s.Paint += new System.Windows.Forms.PaintEventHandler(s_Paint);
             //Events.Tick += new TickEventHandler(Events_Tick);
@@ -114,6 +111,7 @@ namespace Infinity_Project
             _expandedRam = new byte[0x18000];
             _sRam = new byte[0x40000];
             _hardwareRegs = new byte[0x2000];
+            _apuMemory = new byte[65536];
 
             _dmaChannels = new DMAChannel[8];
 
@@ -242,6 +240,10 @@ namespace Infinity_Project
                     return _expandedRam[effectiveAddr - 0x8000];
             else
                 return _expandedRam[effectiveAddr + 0x8000];
+        }
+        public byte ReadByteAPU(ushort Addr)
+        {
+            return _apuMemory[Addr];
         }
         public byte ReadByteRegister(uint Addr)
         {
@@ -466,6 +468,10 @@ namespace Infinity_Project
                     _expandedRam[effectiveAddr - 0x8000] = b;
             else
                 _expandedRam[effectiveAddr + 0x8000] = b;
+        }
+        public void WriteByteAPU(ushort Addr, byte b)
+        {
+            _apuMemory[Addr] = b;
         }
         public void WriteByteRegister(uint Addr, byte b)
         {
@@ -1252,7 +1258,6 @@ namespace Infinity_Project
                 this.Step();
             }
             this._ppu.UnlockFrameBuffer();
-            this._ppu.RenderScreen();
 
             _scanLineNumber = 0;
             _ppu.InVBlank = false;
